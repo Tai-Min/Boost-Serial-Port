@@ -190,9 +190,6 @@ void BoostSerial::writeBytes(const std::vector<uint8_t> &v)
     serial.write_some(boost::asio::buffer(v, v.size()));
 }
 
-#include <iostream>
-using namespace std;
-
 template <class T>
 void BoostSerial::print(T a, unsigned int option)
 {
