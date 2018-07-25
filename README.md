@@ -2,13 +2,45 @@
 
 This header file provides synchronous, non-blocking* access to utilize device's hardware serial port in Arduino-like manner<br /><br />
 
-*write is blocking for now
-
 ## Build
 #### Linux
 + Requires boost_system and pthread linked.
 
 ## Usage
+
+#### Typedefs and enums
+```cpp
+typedef boost::asio::serial_port_base::flow_control::type flowControlType;
+ ```
+ **possible values:**
++ hardware
++ software
++ none
+ 
+ ```cpp
+typedef boost::asio::serial_port_base::parity::type parityType;
+ ```
+ **possible values:**
+ + odd
+ + even
+ + none
+ 
+ ```cpp
+typedef boost::asio::serial_port_base::stop_bits::type stopBitsType;
+ ```
+ **possible values:**
+ + one
+ + onepointfive
+ + two
+ 
+ ```cpp
+enum format;
+```
+ **possible values:**
+ + BIN
+ + OCT
+ + DEC
+ + HEX<br /><br />
 
 #### Open serial port
 ```cpp
@@ -39,6 +71,7 @@ void close();
 unsigned int write(uint8_t data);
 ```
 + **data:** A byte to write
+***
 + **returns:** Number of bytes written<br /><br />
 
 ```cpp
@@ -46,6 +79,7 @@ unsigned int write(std::vector<uint8_t> && data);
 unsigned int write(std::vector<uint8_t> const & data);
 ```
 + **data:** Vector of bytes to write
+***
 + **returns:** Number of bytes written<br /><br />
  
 #### Print ascii formatted data
@@ -57,12 +91,14 @@ template<typename T>
 + **option:** For integral variables its used to specify the format of given data (see BoostSerial::format)
 + **option:** For floating point variables its used to specify the decimal precision.
 + **option:** For anything else this argument is useless.
+***
 + **returns:** Number of characters written<br /><br />
 
 ```cpp
 unsigned int print(std::string const & data);
  ```
  + **data:** String to write
+ ***
  + **returns:** Number of characters written<br /><br />
  
 #### Print ascii formatted characters or strings with newline
@@ -74,12 +110,14 @@ template<typename T>
 + **option:** For integral variables its used to specify the format of given data (see BoostSerial::format)
 + **option:** For floating point variables its used to specify the decimal precision.
 + **option:** For anything else this argument is useless.
+***
 + **returns:** Number of characters written<br /><br />
 
 ```cpp
 unsigned int println(std::string const & data);
 ```
  + **data:** String to write
+ ***
  + **returns:** Number of characters written<br /><br />
  
 #### Read character or sequence of raw bytes from buffer
@@ -97,6 +135,7 @@ std::vector<uint8_t> readBytes();
 std::vector<uint8_t> readBytesUntil(uint8_t terminator);
 ```
 + **terminator:** Byte that will end the reading (this byte is not included in the return but is removed from the buffer)
+***
 + **returns:** Everything to given terminator or whole buffer if terminator wasn't found<br /><br />
 
 #### Read strings
@@ -109,6 +148,7 @@ std::string readString();
 std::string readStringUntil(char terminator);
 ```
 + **terminator:** Character that will end the reading(this character is not included in the return but is removed from the buffer)
+***
 + **returns:** Everything to given terminator or everything given to terminator character '\0' or whole buffer whichever was first<br /><br />
 
 #### Check next character in read buffer
