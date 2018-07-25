@@ -75,6 +75,7 @@ unsigned int write(std::vector<uint8_t> && data);
 unsigned int write(std::vector<uint8_t> const & data);
 ```
 + **data:** Vector of bytes to write
+<br />
 
 + **returns:** Number of bytes written<br /><br />
 
@@ -87,6 +88,7 @@ template<typename T>
 + **option:** For integral variables its used to specify the format of given data (see BoostSerial::format)
 + **option:** For floating point variables its used to specify the decimal precision.
 + **option:** For anything else this argument is useless.
+<br />
 
 + **returns:** Number of characters written<br /><br />
 
@@ -95,6 +97,7 @@ template<typename T>
 unsigned int print(std::string const & data);
 ```
 + **data:** String to write
+<br />
 
 + **returns:** Number of characters written<br /><br />
 
@@ -107,6 +110,7 @@ template<typename T>
 + **option:** For integral variables its used to specify the format of given data (see BoostSerial::format)
 + **option:** For floating point variables its used to specify the decimal precision.
 + **option:** For anything else this argument is useless.
+<br />
 
 + **returns:** Number of characters written<br /><br />
 ***
@@ -115,6 +119,7 @@ template<typename T>
 unsigned int println(std::string const & data);
 ```
  + **data:** String to write
+ <br />
  
  + **returns:** Number of characters written<br /><br />
  
@@ -135,6 +140,7 @@ std::vector<uint8_t> readBytes();
 std::vector<uint8_t> readBytesUntil(uint8_t terminator);
 ```
 + **terminator:** Byte that will end the reading (this byte is not included in the return but is removed from the buffer)
+<br />
 
 + **returns:** Everything to given terminator or whole buffer if terminator wasn't found<br /><br />
 
@@ -149,6 +155,7 @@ std::string readString();
 std::string readStringUntil(char terminator);
 ```
 + **terminator:** Character that will end the reading(this character is not included in the return but is removed from the buffer)
+<br />
 
 + **returns:** Everything to given terminator or everything given to terminator character '\0' or whole buffer whichever was first<br /><br />
 
