@@ -36,13 +36,13 @@ void close();
 
 #### Write raw bytes
 ```cpp
-void write(uint8_t data);
+unsigned int write(uint8_t data);
 ```
 + **data:** A byte to write
 + **returns:** Number of bytes written<br /><br />
 
 ```cpp
-void write(std::vector<uint8_t> && data);
+unsigned int write(std::vector<uint8_t> && data);
 unsigned int write(std::vector<uint8_t> const & data);
 ```
 + **data:** Vector of bytes to write
