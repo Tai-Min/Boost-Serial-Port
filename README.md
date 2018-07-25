@@ -38,43 +38,50 @@ void close();
 ```cpp
 void write(uint8_t data);
 ```
-+ **data:** A byte to write<br /><br />
++ **data:** A byte to write
++ **returns:** Number of bytes written<br /><br />
+
 ```cpp
 void write(std::vector<uint8_t> && data);
-void write(std::vector<uint8_t> const & data);
+unsigned int write(std::vector<uint8_t> const & data);
 ```
-+ **data:** Vector of bytes to write<br /><br />
-
++ **data:** Vector of bytes to write
++ **returns:** Number of bytes written<br /><br />
+ 
 #### Print ascii formatted data
 ```cpp
 template<typename T>
-  void print(T data, unsigned int option = BoostSerial::DEC);
+  unsigned int print(T data, unsigned int option = BoostSerial::DEC);
 ```
 + **data:** Some data to print. 
 + **option:** For integral variables its used to specify the format of given data (see BoostSerial::format)
 + **option:** For floating point variables its used to specify the decimal precision.
-+ **option:** For anything else this argument is useless.<br /><br />
++ **option:** For anything else this argument is useless.
++ **returns:** Number of characters written<br /><br />
 
 ```cpp
-void print(std::string const & data);
+unsigned int print(std::string const & data);
  ```
- + **data:** String to write<br /><br />
+ + **data:** String to write
+ + **returns:** Number of characters written<br /><br />
  
 #### Print ascii formatted characters or strings with newline
 ```cpp
 template<typename T>
-  void println(T data, unsigned int option = BoostSerial::DEC);
+  unsigned int println(T data, unsigned int option = BoostSerial::DEC);
 ```
 + **data:** Some data to print. 
 + **option:** For integral variables its used to specify the format of given data (see BoostSerial::format)
 + **option:** For floating point variables its used to specify the decimal precision.
-+ **option:** For anything else this argument is useless.<br /><br />
++ **option:** For anything else this argument is useless.
++ **returns:** Number of characters written<br /><br />
 
 ```cpp
-void println(std::string const & data);
+unsigned int println(std::string const & data);
 ```
- + **data:** String to write<br /><br />
-
+ + **data:** String to write
+ + **returns:** Number of characters written<br /><br />
+ 
 #### Read character or sequence of raw bytes from buffer
 ```cpp
 int16_t read();
