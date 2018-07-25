@@ -65,6 +65,7 @@ void close();
 unsigned int write(uint8_t data);
 ```
 + **data:** A byte to write
+<br />
 
 + **returns:** Number of bytes written<br /><br />
 
