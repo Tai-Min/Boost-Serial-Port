@@ -19,9 +19,6 @@ void loop()
 }
 */
 
-#include <iostream>
-using namespace std;
-
 BoostSerial s;
 
 TEST(Serial, write)
