@@ -19,6 +19,9 @@ void loop()
 }
 */
 
+#include <iostream>
+using namespace std;
+
 BoostSerial s;
 
 TEST(Serial, write)
@@ -27,7 +30,6 @@ TEST(Serial, write)
     while (!s.available())
         ;
     ASSERT_EQ(10, s.read());
-    s.flush();
 }
 
 TEST(Serial, writeBytestRval)
@@ -36,7 +38,6 @@ TEST(Serial, writeBytestRval)
     while (!s.available())
         ;
     ASSERT_EQ(std::vector<uint8_t>({1, 2, 5, 7, 19}), s.readBytes());
-    s.flush();
 }
 
 TEST(Serial, writeBytesLval)
@@ -46,7 +47,6 @@ TEST(Serial, writeBytesLval)
     while (!s.available())
         ;
     ASSERT_EQ(std::vector<uint8_t>({1, 6, 10, 245}), s.readBytes());
-    s.flush();
 }
 
 TEST(Serial, printTemplate)
@@ -55,55 +55,46 @@ TEST(Serial, printTemplate)
     while (!s.available())
         ;
     ASSERT_EQ("11", s.readString());
-    s.flush();
 
     ASSERT_EQ(2, s.print("24"));
     while (!s.available())
         ;
     ASSERT_EQ("24", s.readString());
-    s.flush();
 
     ASSERT_EQ(2, s.print("24\0 somechars"));
     while (!s.available())
         ;
     ASSERT_EQ("24", s.readString());
-    s.flush();
 
     ASSERT_EQ(1, s.print('c'));
     while (!s.available())
         ;
     ASSERT_EQ('c', s.read());
-    s.flush();
 
     ASSERT_EQ(5, s.print((float)21.2));
     while (!s.available())
         ;
     ASSERT_EQ("21.20", s.readString());
-    s.flush();
 
     ASSERT_EQ(5, s.print((double)213.2, 1));
     while (!s.available())
         ;
     ASSERT_EQ("213.2", s.readString());
-    s.flush();
 
     ASSERT_EQ(1, s.print(10, BoostSerial::HEX));
     while (!s.available())
         ;
     ASSERT_EQ("a", s.readString());
-    s.flush();
 
     ASSERT_EQ(2, s.print(12, BoostSerial::OCT));
     while (!s.available())
         ;
     ASSERT_EQ("14", s.readString());
-    s.flush();
 
     ASSERT_EQ(11, s.print(1333, BoostSerial::BIN));
     while (!s.available())
         ;
     ASSERT_EQ("10100110101", s.readString());
-    s.flush();
 }
 
 TEST(Serial, printString)
@@ -113,14 +104,12 @@ TEST(Serial, printString)
     while (!s.available())
         ;
     ASSERT_EQ("string1", s.readString());
-    s.flush();
 
     t = "string1\0 20";
     ASSERT_EQ(7, s.print(t));
     while (!s.available())
         ;
     ASSERT_EQ("string1", s.readString());
-    s.flush();
 }
 
 TEST(Serial, printlnTemplate)
@@ -129,7 +118,6 @@ TEST(Serial, printlnTemplate)
     while (!s.available())
         ;
     ASSERT_EQ("Test\n", s.readString());
-    s.flush();
 }
 
 TEST(Serial, printlnString)
@@ -139,14 +127,13 @@ TEST(Serial, printlnString)
     while (!s.available())
         ;
     ASSERT_EQ("Min\n", s.readString());
-    s.flush();
 }
 
 TEST(Serial, read)
 {
     ASSERT_EQ(-1, s.read());
 
-    s.write(20);
+    ASSERT_EQ(1, s.write(20));
     while (!s.available())
         ;
     ASSERT_EQ(20, s.read());
@@ -154,16 +141,15 @@ TEST(Serial, read)
 
 TEST(Serial, readBytes)
 {
-    s.write(std::vector<uint8_t>({10, 20, 30, 44}));
+    ASSERT_EQ(4, s.write(std::vector<uint8_t>({10, 20, 30, 44})));
     while (!s.available())
         ;
     ASSERT_EQ(std::vector<uint8_t>({10, 20, 30, 44}), s.readBytes());
-    s.flush();
 }
 
 TEST(Serial, readBytesUntil)
 {
-    s.write(std::vector<uint8_t>({1, 2, 4, 7, 22}));
+    ASSERT_EQ(5, s.write(std::vector<uint8_t>({1, 2, 4, 7, 22})));
     while (!s.available())
         ;
     ASSERT_EQ(std::vector<uint8_t>({1, 2, 4}), s.readBytesUntil(7));
@@ -172,26 +158,26 @@ TEST(Serial, readBytesUntil)
 
 TEST(Serial, readString)
 {
-    s.print("Hello");
+    ASSERT_EQ(5, s.print("Hello"));
     while (!s.available())
         ;
     ASSERT_EQ("Hello", s.readString());
-    s.flush();
 }
 
 TEST(Serial, readStringUntil)
 {
-    s.print("Mmmad");
+    ASSERT_EQ(5, s.print("Mmmad"));
     while (!s.available())
         ;
     ASSERT_EQ("Mmm", s.readStringUntil('a'));
+    ASSERT_EQ(1, s.available());
     s.flush();
 }
 
 TEST(Serial, peek)
 {
     ASSERT_EQ(-1, s.peek());
-    s.print("abd");
+    ASSERT_EQ(3, s.print("abd"));
     while (!s.available())
         ;
     ASSERT_EQ('a', s.peek());
@@ -203,7 +189,7 @@ TEST(Serial, peek)
 
 TEST(Serial, available)
 {
-    s.print("Hello");
+    ASSERT_EQ(5, s.print("Hello"));
     while (!s.available())
         ;
     ASSERT_EQ(5, s.available());
@@ -212,9 +198,10 @@ TEST(Serial, available)
 
 TEST(Serial, flush)
 {
-    s.print("Sup");
+    ASSERT_EQ(3, s.print("Sup"));
     while (!s.available())
         ;
+    ASSERT_EQ(3, s.available());
     s.flush();
     ASSERT_EQ(0, s.available());
 }
