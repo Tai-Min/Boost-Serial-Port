@@ -33,6 +33,7 @@ bool isOpen() const;
 void close();
 ```
 <br />
+
 #### Write raw bytes
 ```cpp
 void write(uint8_t data);
@@ -119,6 +120,7 @@ unsigned int available() const;
 void flush();
 ```
 <br />
+
 #### Set parameters of the serial port
 ```cpp
 void etBaud(unsigned int = 115200);
