@@ -23,7 +23,7 @@ BoostSerial s;
 
 TEST(Serial, write)
 {
-    s.write(10);
+    ASSERT_EQ(1, s.write(10));
     while (!s.available())
         ;
     ASSERT_EQ(10, s.read());
@@ -32,7 +32,7 @@ TEST(Serial, write)
 
 TEST(Serial, writeBytestRval)
 {
-    s.writeBytes({1, 2, 5, 7, 19});
+    ASSERT_EQ(5, s.write({1, 2, 5, 7, 19}));
     while (!s.available())
         ;
     ASSERT_EQ(std::vector<uint8_t>({1, 2, 5, 7, 19}), s.readBytes());
@@ -42,7 +42,7 @@ TEST(Serial, writeBytestRval)
 TEST(Serial, writeBytesLval)
 {
     std::vector<uint8_t> v({1, 6, 10, 245});
-    s.writeBytes(v);
+    ASSERT_EQ(4, s.write(v));
     while (!s.available())
         ;
     ASSERT_EQ(std::vector<uint8_t>({1, 6, 10, 245}), s.readBytes());
@@ -51,49 +51,55 @@ TEST(Serial, writeBytesLval)
 
 TEST(Serial, printTemplate)
 {
-    s.print((int)11);
+    ASSERT_EQ(2, s.print((int)11));
     while (!s.available())
         ;
     ASSERT_EQ("11", s.readString());
     s.flush();
 
-    s.print("24");
+    ASSERT_EQ(2, s.print("24"));
     while (!s.available())
         ;
     ASSERT_EQ("24", s.readString());
     s.flush();
 
-    s.print('c');
+    ASSERT_EQ(2, s.print("24\0 somechars"));
+    while (!s.available())
+        ;
+    ASSERT_EQ("24", s.readString());
+    s.flush();
+
+    ASSERT_EQ(1, s.print('c'));
     while (!s.available())
         ;
     ASSERT_EQ('c', s.read());
     s.flush();
 
-    s.print((float)21.2);
+    ASSERT_EQ(5, s.print((float)21.2));
     while (!s.available())
         ;
     ASSERT_EQ("21.20", s.readString());
     s.flush();
 
-    s.print((double)213.2, 1);
+    ASSERT_EQ(5, s.print((double)213.2, 1));
     while (!s.available())
         ;
     ASSERT_EQ("213.2", s.readString());
     s.flush();
 
-    s.print(10, BoostSerial::HEX);
+    ASSERT_EQ(1, s.print(10, BoostSerial::HEX));
     while (!s.available())
         ;
     ASSERT_EQ("a", s.readString());
     s.flush();
 
-    s.print(12, BoostSerial::OCT);
+    ASSERT_EQ(2, s.print(12, BoostSerial::OCT));
     while (!s.available())
         ;
     ASSERT_EQ("14", s.readString());
     s.flush();
 
-    s.print(1333, BoostSerial::BIN);
+    ASSERT_EQ(11, s.print(1333, BoostSerial::BIN));
     while (!s.available())
         ;
     ASSERT_EQ("10100110101", s.readString());
@@ -103,13 +109,14 @@ TEST(Serial, printTemplate)
 TEST(Serial, printString)
 {
     std::string t = "string1";
-    s.print(t);
+    ASSERT_EQ(7, s.print(t));
     while (!s.available())
         ;
     ASSERT_EQ("string1", s.readString());
+    s.flush();
 
     t = "string1\0 20";
-    s.print(t);
+    ASSERT_EQ(7, s.print(t));
     while (!s.available())
         ;
     ASSERT_EQ("string1", s.readString());
@@ -118,7 +125,7 @@ TEST(Serial, printString)
 
 TEST(Serial, printlnTemplate)
 {
-    s.println("Test");
+    ASSERT_EQ(5, s.println("Test"));
     while (!s.available())
         ;
     ASSERT_EQ("Test\n", s.readString());
@@ -128,7 +135,7 @@ TEST(Serial, printlnTemplate)
 TEST(Serial, printlnString)
 {
     std::string t = "Min";
-    s.println(t);
+    ASSERT_EQ(4, s.println(t));
     while (!s.available())
         ;
     ASSERT_EQ("Min\n", s.readString());
@@ -147,7 +154,7 @@ TEST(Serial, read)
 
 TEST(Serial, readBytes)
 {
-    s.writeBytes(std::vector<uint8_t>({10, 20, 30, 44}));
+    s.write(std::vector<uint8_t>({10, 20, 30, 44}));
     while (!s.available())
         ;
     ASSERT_EQ(std::vector<uint8_t>({10, 20, 30, 44}), s.readBytes());
@@ -156,7 +163,7 @@ TEST(Serial, readBytes)
 
 TEST(Serial, readBytesUntil)
 {
-    s.writeBytes(std::vector<uint8_t>({1, 2, 4, 7, 22}));
+    s.write(std::vector<uint8_t>({1, 2, 4, 7, 22}));
     while (!s.available())
         ;
     ASSERT_EQ(std::vector<uint8_t>({1, 2, 4}), s.readBytesUntil(7));
