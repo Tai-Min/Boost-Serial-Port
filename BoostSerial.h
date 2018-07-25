@@ -58,24 +58,24 @@ class BoostSerial
     ~BoostSerial();
 
     //write one byte
-    void write(uint8_t);
+    unsigned int write(uint8_t);
     //write vector of bytes
-    void writeBytes(std::vector<uint8_t> &&);
-    void writeBytes(const std::vector<uint8_t> &);
+    unsigned int write(std::vector<uint8_t> &&);
+    unsigned int write(std::vector<uint8_t> const &);
 
     //print to stream any data using stringstream
     //second parameter depends on type
     //for int its bin/dec/oct/hex
     //for double its decimal point precision
     template <class T>
-    void print(T, unsigned int = DEC);
+    unsigned int print(T, unsigned int = DEC);
     //for string use reference to avoid unnecessary copies
-    void print(std::string const &);
+    unsigned int print(std::string const &);
 
     //same as above with newline added
     template <class T>
-    void println(T, unsigned int = DEC);
-    void println(std::string const &);
+    unsigned int println(T, unsigned int = DEC);
+    unsigned int println(std::string const &);
 
     //read one character/byte -1 if buffer is empty
     int16_t read();
@@ -174,24 +174,26 @@ BoostSerial::~BoostSerial()
         close();
 }
 
-void BoostSerial::write(uint8_t c)
+unsigned int BoostSerial::write(uint8_t c)
 {
     std::vector<uint8_t> v({c});
-    writeBytes(v);
+    return write(v);
 }
 
-void BoostSerial::writeBytes(std::vector<uint8_t> &&v)
+unsigned int BoostSerial::write(std::vector<uint8_t> &&v)
 {
     serial.write_some(boost::asio::buffer(v, v.size()));
+    return v.size();
 }
 
-void BoostSerial::writeBytes(const std::vector<uint8_t> &v)
+unsigned int BoostSerial::write(const std::vector<uint8_t> &v)
 {
     serial.write_some(boost::asio::buffer(v, v.size()));
+    return v.size();
 }
 
 template <class T>
-void BoostSerial::print(T a, unsigned int option)
+unsigned int BoostSerial::print(T a, unsigned int option)
 {
     //write unknown data to stringstream
     std::stringstream ss;
@@ -244,25 +246,30 @@ void BoostSerial::print(T a, unsigned int option)
     {
         ss << a;
     }
-    printString(ss.str());
+    std::string res = ss.str();
+    printString(res);
+    return res.length();
 }
 
-void BoostSerial::print(const std::string &s)
+unsigned int BoostSerial::print(const std::string &s)
 {
     printString(s);
+    return s.length();
 }
 
 template <class T>
-void BoostSerial::println(T t, unsigned int option)
+unsigned int BoostSerial::println(T t, unsigned int option)
 {
-    print(t, option);
+    unsigned int r = print(t, option);
     write('\n');
+    return r+1;
 }
 
-void BoostSerial::println(const std::string &s)
+unsigned int BoostSerial::println(const std::string &s)
 {
     printString(s);
     write('\n');
+    return s.length() + 1;
 }
 
 int16_t BoostSerial::read()
