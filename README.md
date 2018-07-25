@@ -8,7 +8,7 @@ This header file provides synchronous, non-blocking* access to utilize device's 
 
 ## Usage
 
-#### Typedefs and enums
+### Typedefs and enums
 ```cpp
 typedef boost::asio::serial_port_base::flow_control::type flowControlType;
  ```
@@ -45,7 +45,7 @@ enum format;
  + DEC
  + HEX<br /><br />
 
-#### Open serial port
+### Open serial port
 ```cpp
 void open(std::string name,
 unsigned int baudRate = 115200,
@@ -57,19 +57,19 @@ stopBitsType stopBits = stopBitsType::one);
 + **name:** Name of the serial port (i.e COM1)
 + **Everything else:** should be self explanatory <br /><br />
 
-#### check whether serial port is open
+### check whether serial port is open
 ```cpp
 bool isOpen() const;
 ```
 + **returns:** True if serial port is opened, false otherwise<br /><br />
 
-#### Close serial port
+### Close serial port
 ```cpp
 void close();
 ```
 <br />
 
-#### Write raw bytes
+### Write raw bytes
 ```cpp
 unsigned int write(uint8_t data);
 ```
@@ -84,7 +84,7 @@ unsigned int write(std::vector<uint8_t> const & data);
 + **data:** Vector of bytes to write<br />
 + **returns:** Number of bytes written<br /><br />
 
-#### Print ascii formatted data
+### Print ascii formatted data
 ```cpp
 template<typename T>
   unsigned int print(T data, unsigned int option = BoostSerial::DEC);
@@ -92,17 +92,17 @@ template<typename T>
 + **data:** Some data to print. 
 + **option:** For integral variables its used to specify the format of given data (see BoostSerial::format)
 + **option:** For floating point variables its used to specify the decimal precision.
-+ **option:** For anything else this argument is useless.<br />
++ **option:** For anything else this argument is useless.
 + **returns:** Number of characters written<br /><br />
 
 ***
 ```cpp
 unsigned int print(std::string const & data);
 ```
-+ **data:** String to write<br />
++ **data:** String to write
 + **returns:** Number of characters written<br /><br />
 
-#### Print ascii formatted characters or strings with newline
+### Print ascii formatted characters or strings with newline
 ```cpp
 template<typename T>
   unsigned int println(T data, unsigned int option = BoostSerial::DEC);
@@ -110,7 +110,7 @@ template<typename T>
 + **data:** Some data to print. 
 + **option:** For integral variables its used to specify the format of given data (see BoostSerial::format)
 + **option:** For floating point variables its used to specify the decimal precision.
-+ **option:** For anything else this argument is useless.<br />
++ **option:** For anything else this argument is useless.
 + **returns:** Number of characters written<br /><br />
 ***
 
@@ -120,7 +120,7 @@ unsigned int println(std::string const & data);
  + **data:** String to write<br />
  + **returns:** Number of characters written<br /><br />
  
-#### Read character or sequence of raw bytes from buffer
+### Read character or sequence of raw bytes from buffer
 ```cpp
 int16_t read();
 ```
@@ -137,10 +137,9 @@ std::vector<uint8_t> readBytes();
 std::vector<uint8_t> readBytesUntil(uint8_t terminator);
 ```
 + **terminator:** Byte that will end the reading (this byte is not included in the return but is removed from the buffer)
-***
 + **returns:** Everything to given terminator or whole buffer if terminator wasn't found<br /><br />
 
-#### Read strings
+### Read strings
 ```cpp
 std::string readString();
 ```
@@ -150,28 +149,28 @@ std::string readString();
 ```cpp
 std::string readStringUntil(char terminator);
 ```
-+ **terminator:** Character that will end the reading(this character is not included in the return but is removed from the buffer)<br />
++ **terminator:** Character that will end the reading(this character is not included in the return but is removed from the buffer)
 + **returns:** Everything to given terminator or everything given to terminator character '\0' or whole buffer whichever was first<br /><br />
 
-#### Check next character in read buffer
+### Check next character in read buffer
 ```
 int16_t peek() const;
 ```
 + **returns:** First byte in the buffer (doesn't remove it) or -1 if the buffer is empty<br /><br />
 
-#### Check number of bytes available in the read buffer
+### Check number of bytes available in the read buffer
 ```cpp
 unsigned int available() const;
 ```
 + **returns:** Number of bytes waiting in the read buffer<br /><br />
 
-#### Clear read buffer
+### Clear read buffer
 ```cpp
 void flush();
 ```
 <br />
 
-#### Set parameters of the serial port
+### Set parameters of the serial port
 ```cpp
 void etBaud(unsigned int = 115200);
 void setFlowControl(flowControlType = flowControlType::none);
@@ -182,7 +181,7 @@ void setBufferSize(unsigned int = 256);
 ```
 setBufferSize affects size of the internal read buffer. If overflow happens, the data that appeared first will be lost<br /><br />
 
-#### Get parameters of the serial port
+### Get parameters of the serial port
 ```cpp
 unsigned int getBaud();
 flowControlType getFlowControl();
