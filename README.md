@@ -186,7 +186,7 @@ void setPraity(parityType = parityType::none);
 void setStopBits(stopBitsType = stopBitsType::one);
 void setBufferSize(unsigned int = 256);
 ```
-setBufferSize affects size of the internal read buffer. If overflow happens, the data that appeared first will be lost<br /><br />
+setBufferSize affects the size of the internal read buffer. If overflow happens, the data that appeared first will be lost<br /><br />
 
 ### Get parameters of the serial port
 ```cpp
