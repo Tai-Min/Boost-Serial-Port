@@ -121,7 +121,7 @@ int16_t peek() const;
 ```cpp
 unsigned int available() const;
 ```
-<br /><br />
++ **returns:** Number of bytes waiting in the read buffer<br /><br />
 #### Clear read buffer
 ```cpp
 void flush();
@@ -137,7 +137,7 @@ void setPraity(parityType = parityType::none);
 void setStopBits(stopBitsType = stopBitsType::one);
 void setBufferSize(unsigned int = 256);
 ```
-setBufferSize affects size of the internal read buffer. If overflow happens, the data that appeared first will be lost<br />
+setBufferSize affects size of the internal read buffer. If overflow happens, the data that appeared first will be lost<br /><br />
 
 #### Get parameters of the serial port
 ```cpp
