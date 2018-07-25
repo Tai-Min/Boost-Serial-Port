@@ -32,7 +32,7 @@ bool isOpen() const;
 ```cpp
 void close();
 ```
-<br /><br />
+<br />
 #### Write raw bytes
 ```cpp
 void write(uint8_t data);
@@ -118,7 +118,7 @@ unsigned int available() const;
 ```cpp
 void flush();
 ```
-<br /><br />
+<br />
 #### Set parameters of the serial port
 ```cpp
 void etBaud(unsigned int = 115200);
@@ -128,7 +128,7 @@ void setPraity(parityType = parityType::none);
 void setStopBits(stopBitsType = stopBitsType::one);
 void setBufferSize(unsigned int = 256);
 ```
-setBufferSize affects size of the internal read buffer. If overflow happens, the data that appeared first will be lost<br /><br />
+setBufferSize affects size of the internal read buffer. If overflow happens, the data that appeared first will be lost<br />
 
 #### Get parameters of the serial port
 ```cpp
