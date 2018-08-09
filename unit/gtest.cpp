@@ -2,11 +2,13 @@
 #include <gtest/gtest.h>
 #include "../BoostSerial.h"
 
+#define DEFAULT_TIMEOUT 15
+
 /*
 Arduino code
 void setup()
 {
-    Serial.begin(9600);
+    Serial.begin(115200);
 }
 
 void loop()
@@ -142,6 +144,17 @@ TEST(Serial, readBytes)
     while (!s.available())
         ;
     ASSERT_EQ(std::vector<uint8_t>({10, 20, 30, 44}), s.readBytes());
+
+    s.setTimeout(2);
+    ASSERT_EQ(36, s.write(std::vector<uint8_t>({10, 20, 30, 44, 2, 2, 4, 5, 6, 2, 3, 5, 6, 76, 2, 234, 5, 6, 7, 23, 3, 2, 3, 3, 3, 3, 1, 2, 2, 3, 3, 34, 3, 1, 1, 1})));
+    while (!s.available())
+        ;
+    ASSERT_NE(std::vector<uint8_t>({10, 20, 30, 44, 2, 2, 4, 5, 6, 2, 3, 5, 6, 76, 2, 234, 5, 6, 7, 23, 3, 2, 3, 3, 3, 3, 1, 2, 2, 3, 3, 34, 3, 1, 1, 1}), s.readBytes());
+    s.setTimeout(DEFAULT_TIMEOUT);
+
+    //wait for the rest of the data
+    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_TIMEOUT*20));
+    s.flush();
 }
 
 TEST(Serial, readBytesUntil)
@@ -151,6 +164,17 @@ TEST(Serial, readBytesUntil)
         ;
     ASSERT_EQ(std::vector<uint8_t>({1, 2, 4}), s.readBytesUntil(7));
     s.flush();
+
+    s.setTimeout(2);
+    ASSERT_EQ(37, s.write(std::vector<uint8_t>({10, 20, 30, 44, 2, 2, 4, 5, 6, 2, 3, 5, 6, 76, 2, 234, 5, 6, 7, 23, 3, 2, 3, 3, 3, 3, 1, 2, 2, 3, 3, 34, 3, 1, 1, 1, 255})));
+    while (!s.available())
+        ;
+    ASSERT_NE(std::vector<uint8_t>({10, 20, 30, 44, 2, 2, 4, 5, 6, 2, 3, 5, 6, 76, 2, 234, 5, 6, 7, 23, 3, 2, 3, 3, 3, 3, 1, 2, 2, 3, 3, 34, 3, 1, 1, 1}), s.readBytesUntil(255));
+    s.setTimeout(DEFAULT_TIMEOUT);
+
+    //wait for the rest of the data
+    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_TIMEOUT*20));
+    s.flush();
 }
 
 TEST(Serial, readString)
@@ -159,6 +183,17 @@ TEST(Serial, readString)
     while (!s.available())
         ;
     ASSERT_EQ("Hello", s.readString());
+
+    s.setTimeout(2);
+    ASSERT_EQ(79, s.print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+    while (!s.available())
+        ;
+    ASSERT_NE("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", s.readString());
+    s.setTimeout(DEFAULT_TIMEOUT);
+
+    //wait for the rest of the data
+    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_TIMEOUT*20));
+    s.flush();
 }
 
 TEST(Serial, readStringUntil)
@@ -167,7 +202,19 @@ TEST(Serial, readStringUntil)
     while (!s.available())
         ;
     ASSERT_EQ("Mmm", s.readStringUntil('a'));
-    ASSERT_EQ(1, s.available());
+    while (!s.available())
+        ;
+    s.flush();
+
+    s.setTimeout(2);
+    ASSERT_EQ(92, s.print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaAAAAAAAAAAAABAAAAAAAAAA"));
+    while (!s.available())
+        ;
+    ASSERT_NE("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaAAAAAAAAAAAA", s.readStringUntil('B'));
+    s.setTimeout(DEFAULT_TIMEOUT);
+
+    //wait for the rest of the data
+    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_TIMEOUT*20));
     s.flush();
 }
 
@@ -180,27 +227,20 @@ TEST(Serial, peek)
     ASSERT_EQ('a', s.peek());
     ASSERT_EQ('a', s.peek());
     s.read();
+    while (!s.available())
+        ;
     ASSERT_EQ('b', s.peek());
     s.flush();
 }
 
-TEST(Serial, available)
+TEST(Serial, writeALot)
 {
-    ASSERT_EQ(5, s.print("Hello"));
+    s.setTimeout(1000);
+    std::vector<uint8_t> data(10000);
+    s.write(data);
     while (!s.available())
         ;
-    ASSERT_EQ(5, s.available());
-    s.flush();
-}
-
-TEST(Serial, flush)
-{
-    ASSERT_EQ(3, s.print("Sup"));
-    while (!s.available())
-        ;
-    ASSERT_EQ(3, s.available());
-    s.flush();
-    ASSERT_EQ(0, s.available());
+    ASSERT_EQ(data.size(), s.readBytes().size());
 }
 
 int main(int argc, char **argv)
@@ -208,8 +248,9 @@ int main(int argc, char **argv)
     s.open("/dev/ttyUSB0");
     if (!s.isOpen())
         return 1;
-    s.setBaud(9600);
-
+    s.setBaud(115200);
+    s.flush();
+    s.setTimeout(DEFAULT_TIMEOUT);
     std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
     ::testing::InitGoogleTest(&argc, argv);
