@@ -31,6 +31,13 @@ typedef boost::asio::serial_port_base::stop_bits::type stopBitsType;
  
 ***
  ```cpp
+typedef boost::system::errc::errc_t errorCode;
+ ```
+ **possible values:**
++ see: https://www.boost.org/doc/libs/1_68_0/boost/system/error_code.hpp
+ 
+***
+ ```cpp
 enum format;
 ```
  **possible values:**
@@ -59,6 +66,24 @@ bool isOpen() const;
 void close();
 ```
 <br />
+
+### Get error
+```cpp
+int getErr();
+```
++ **returns:** error code of previous operation, see: https://www.boost.org/doc/libs/1_68_0/boost/system/error_code.hpp<br />
+
+### Cancel port's async operations
+```cpp
+void cancel();
+```
+<br />
+
+### Check whether error happened during async operation
+```cpp
+bool good();
+```
++ **returns:** false if something happened, true on successful operation<br />
 
 ### Write raw bytes
 ```cpp
