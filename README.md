@@ -42,7 +42,7 @@ enum format;
 ```
  **possible values:**
  + BIN / OCT / DEC / HEX<br /><br />
-
+***
 ### Open serial port
 ```cpp
 void open(std::string name,
@@ -53,37 +53,37 @@ parityType parity = parityType::none,
 stopBitsType stopBits = stopBitsType::one);
 ```
 + **name:** Name of the serial port (i.e COM1)
-+ **Everything else:** should be self explanatory <br /><br />
-
++ **Everything else:** should be self explanatory <br />
+***
 ### Check whether serial port is open
 ```cpp
 bool isOpen() const;
 ```
-+ **returns:** True if serial port is opened, false otherwise<br /><br />
-
++ **returns:** True if serial port is opened, false otherwise<br />
+***
 ### Close serial port
 ```cpp
 void close();
 ```
-<br />
 
-### Get error
-```cpp
-int getErr();
-```
-+ **returns:** error code of previous operation, see: https://www.boost.org/doc/libs/1_68_0/boost/system/error_code.hpp<br />
-
-### Cancel port's async operations
-```cpp
-void cancel();
-```
-<br />
-
+***
 ### Check whether error happened during async operation
 ```cpp
-bool good();
+bool good() const;
 ```
 + **returns:** false if something happened, true on successful operation<br />
+***
+### Clear port's error flag
+```cpp
+void clear();
+```
+***
+### Get error
+```cpp
+int getErr() const;
+```
++ **returns:** error code of previous operation, see: https://www.boost.org/doc/libs/1_68_0/boost/system/error_code.hpp<br />
+***
 
 ### Write raw bytes
 ```cpp
@@ -96,14 +96,13 @@ unsigned int write(uint8_t data);
 
 ***
 ```cpp
-unsigned int write(std::vector<uint8_t> && data);
 unsigned int write(std::vector<uint8_t> const & data);
 ```
 + **data:** Vector of bytes to write
 <br />
 
 + **returns:** Number of bytes written<br /><br />
-
+***
 ### Print ascii formatted data
 ```cpp
 template<typename T>
@@ -116,16 +115,7 @@ template<typename T>
 <br />
 
 + **returns:** Number of characters written<br /><br />
-
 ***
-```cpp
-unsigned int print(std::string const & data);
-```
-+ **data:** String to write
-<br />
-
-+ **returns:** Number of characters written<br /><br />
-
 ### Print ascii formatted characters or strings with newline
 ```cpp
 template<typename T>
@@ -139,15 +129,6 @@ template<typename T>
 
 + **returns:** Number of characters written<br /><br />
 ***
-
-```cpp
-unsigned int println(std::string const & data);
-```
- + **data:** String to write
- <br />
- 
- + **returns:** Number of characters written<br /><br />
- 
 ### Read raw byte or sequence of raw bytes from buffer
 ```cpp
 int16_t read();
@@ -156,69 +137,78 @@ int16_t read();
 
 ***
 ```cpp
-std::vector<uint8_t> readBytes();
+std::vector<uint8_t> readBuffer();
 ```
-+ **returns:** Everything from the serial read buffer (clears the buffer)<br /><br />
++ **returns:** Current content of buffer (clears the buffer)
+***
+```cpp
+std::vector<uint8_t> readBytes(uint16_t len = 0xFFFF);
+```
++ **len:** Number of bytes to read
+<br/>
+
++ **returns:** vector of bytes of size **len** or smaller if given number of bytes hadn't been read before timeout (removes read characters from the buffer)<br /><br />
 
 ***
 ```cpp
-std::vector<uint8_t> readBytesUntil(uint8_t terminator);
+std::vector<uint8_t> readBytesUntil(uint8_t terminator, uint16_t len = 0xFFFF);
 ```
 + **terminator:** Byte that will end the reading (this byte is not included in the return but is removed from the buffer)
++ **len:** Number of bytes to read
 <br />
 
-+ **returns:** Everything to given terminator or whole buffer if terminator wasn't found<br /><br />
-
++ **returns:** Vector of bytes to given terminator or vector of size **len** if given terminator hadn't been found in **len** bytes or smaller vector if timeout happened and any of the previous conditions hadn't been met (read characters are removed from the buffer)<br />
+***
 ### Read strings
 ```cpp
 std::string readString();
 ```
-+ **returns:** Everything from serial's read buffer as string<br /><br />
++ **returns:** Everything from serial's read buffer as string. Stops reading on '\0' or on timeout<br /><br />
 
 ***
 ```cpp
-std::string readStringUntil(char terminator);
+std::string readStringUntil(char terminator, uint16_t len = 0xFFFF);
 ```
 + **terminator:** Character that will end the reading(this character is not included in the return but is removed from the buffer)
 <br />
 
-+ **returns:** Everything to given terminator or everything given to terminator character '\0' or whole buffer whichever was first<br /><br />
-
++ **returns:** String to given terminator or string of size **len** if given terminator hadn't been found in **len** bytes or smaller string if timeout happened and any of the previous conditions hadn't been met (read characters are removed from the buffer).
+***
 ### Check next character in read buffer
 ```
 int16_t peek() const;
 ```
-+ **returns:** First byte in the buffer (doesn't remove it) or -1 if the buffer is empty<br /><br />
-
++ **returns:** First byte in the buffer (doesn't remove it) or -1 if the buffer is empty<br />
+***
 ### Check number of bytes available in the read buffer
 ```cpp
 unsigned int available() const;
 ```
-+ **returns:** Number of bytes waiting in the read buffer<br /><br />
-
++ **returns:** Number of bytes waiting in the read buffer<br />
+***
 ### Clear read buffer
 ```cpp
 void flush();
 ```
-<br />
 
+***
 ### Set parameters of the serial port
 ```cpp
-void etBaud(unsigned int = 115200);
+void setBaud(unsigned int = 115200);
 void setFlowControl(flowControlType = flowControlType::none);
 void setCharacterSize(unsigned int = 8);
 void setPraity(parityType = parityType::none);
 void setStopBits(stopBitsType = stopBitsType::one);
 void setBufferSize(unsigned int = 256);
 ```
-setBufferSize affects the size of the internal read buffer. If overflow happens, the data that appeared first will be lost<br /><br />
-
+setBufferSize affects the size of the internal read buffer. If overflow happens, the data that appeared first will be lost<br />
+***
 ### Get parameters of the serial port
 ```cpp
-unsigned int getBaud();
-flowControlType getFlowControl();
-unsigned int getCharacterSize();
-parityType getParity();
-stopBitsType getStopBits();
-unsigned int getBufferSize();
+unsigned int getBaud() const;
+flowControlType getFlowControl() const;
+unsigned int getCharacterSize() const;
+parityType getParity() const;
+stopBitsType getStopBits() const;
+unsigned int getBufferSize() const;
 ```
