@@ -106,7 +106,7 @@ unsigned int write(std::vector<uint8_t> const & data);
 ### Print ascii formatted data
 ```cpp
 template<typename T>
-  unsigned int print(T data, unsigned int option = BoostSerial::DEC);
+  unsigned int print(T const & data, unsigned int option = BoostSerial::DEC);
 ```
 + **data:** Some data to print. 
 + **option:** For integral variables its used to specify the format of given data (see BoostSerial::format)
@@ -119,7 +119,7 @@ template<typename T>
 ### Print ascii formatted characters or strings with newline
 ```cpp
 template<typename T>
-  unsigned int println(T data, unsigned int option = BoostSerial::DEC);
+  unsigned int println(T const & data, unsigned int option = BoostSerial::DEC);
 ```
 + **data:** Some data to print. 
 + **option:** For integral variables its used to specify the format of given data (see BoostSerial::format)
@@ -167,12 +167,12 @@ std::string readString();
 
 ***
 ```cpp
-std::string readStringUntil(char terminator, uint16_t len = 0xFFFF);
+std::string readStringUntil(char terminator = '\0');
 ```
 + **terminator:** Character that will end the reading(this character is not included in the return but is removed from the buffer)
 <br />
 
-+ **returns:** String to given terminator or string of size **len** if given terminator hadn't been found in **len** bytes or smaller string if timeout happened and any of the previous conditions hadn't been met (read characters are removed from the buffer).
++ **returns:** String to given terminator or smaller string if timeout happened and terminator hadn't been found (read characters are removed from the buffer).
 ***
 ### Check next character in read buffer
 ```
@@ -194,12 +194,13 @@ void flush();
 ***
 ### Set parameters of the serial port
 ```cpp
-void setBaud(unsigned int = 115200);
-void setFlowControl(flowControlType = flowControlType::none);
-void setCharacterSize(unsigned int = 8);
-void setPraity(parityType = parityType::none);
-void setStopBits(stopBitsType = stopBitsType::one);
-void setBufferSize(unsigned int = 256);
+void setBaud(unsigned int baud = 115200);
+void setFlowControl(flowControlType flowControl = flowControlType::none);
+void setCharacterSize(unsigned int charSize = 8);
+void setPraity(parityType parity = parityType::none);
+void setStopBits(stopBitsType stopBits = stopBitsType::one);
+void setBufferSize(unsigned int bufSize = 256);
+void setTimeout(unsigned int timeinms = 1000);
 ```
 setBufferSize affects the size of the internal read buffer. If overflow happens, the data that appeared first will be lost<br />
 ***
@@ -211,4 +212,5 @@ unsigned int getCharacterSize() const;
 parityType getParity() const;
 stopBitsType getStopBits() const;
 unsigned int getBufferSize() const;
+unsigned int getTimeout() const;
 ```
