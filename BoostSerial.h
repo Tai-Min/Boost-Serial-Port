@@ -44,13 +44,12 @@ class BoostSerial
     std::vector<uint8_t> usableReadBuffer;
     void asyncReadHandler(const boost::system::error_code &error, std::size_t bytes_transferred);
 
-    std::mutex writeMtx;             //for writeLocked
+    mutable std::mutex writeMtx;             //for writeLocked
     std::condition_variable writeCv; // wait for notify from asyncWriteHandler
     bool writeLocked = false;        //block thread if previous async write hasn't finished
     void asyncWriteHandler(const boost::system::error_code &error, std::size_t bytes_transferred);
 
-    std::mutex errMtx;
-    bool errFlag;
+    mutable std::mutex errMtx;
     int err;
 
     //serial config stuff
@@ -74,7 +73,6 @@ class BoostSerial
     //write one byte
     unsigned int write(uint8_t);
     //write vector of bytes
-    unsigned int write(std::vector<uint8_t> &&);
     unsigned int write(std::vector<uint8_t> const &);
 
     //print to stream any data using stringstream
@@ -84,13 +82,10 @@ class BoostSerial
     //for others its useless
     template <class T>
     unsigned int print(T const &, unsigned int = DEC);
-    //for string use reference to avoid unnecessary copies
-    //unsigned int print(std::string const &);
 
     //same as above with newline added
     template <class T>
     unsigned int println(T const &, unsigned int = DEC);
-    //unsigned int println(std::string const &);
 
     //read one character/byte -1 if buffer is empty
     int16_t read();
@@ -129,7 +124,7 @@ class BoostSerial
               stopBitsType = stopBitsType::one);
     bool isOpen() const;
     void close();
-    bool good();
+    bool good() const;
     
     void clear();
     void cancel();
@@ -164,7 +159,6 @@ void BoostSerial::asyncReadHandler(const boost::system::error_code &error, std::
     if (error)
     {
         err = error.value();
-        errFlag = 1;
     }
     elk.unlock();
 
@@ -202,7 +196,6 @@ void BoostSerial::asyncWriteHandler(const boost::system::error_code &error, std:
     if (error)
     {
         err = error.value();
-        errFlag = 1;
     }
     elk.unlock();
 
@@ -242,11 +235,6 @@ BoostSerial::~BoostSerial()
 unsigned int BoostSerial::write(uint8_t c)
 {
     std::vector<uint8_t> v({c});
-    return write(v);
-}
-
-unsigned int BoostSerial::write(std::vector<uint8_t> &&v)
-{
     return write(v);
 }
 
@@ -328,12 +316,6 @@ unsigned int BoostSerial::print(T const &a, unsigned int option)
     return res.length();
 }
 
-/*unsigned int BoostSerial::print(const std::string &s)
-{
-    printString(s);
-    return s.length();
-}*/
-
 template <class T>
 unsigned int BoostSerial::println(T const & t, unsigned int option)
 {
@@ -341,13 +323,6 @@ unsigned int BoostSerial::println(T const & t, unsigned int option)
     write('\n');
     return r + 1;
 }
-
-/*unsigned int BoostSerial::println(const std::string &s)
-{
-    printString(s);
-    write('\n');
-    return s.length() + 1;
-}*/
 
 int16_t BoostSerial::read()
 {
@@ -550,10 +525,10 @@ void BoostSerial::close()
     serial.close();
 }
 
-bool BoostSerial::good()
+bool BoostSerial::good() const
 {
     std::unique_lock<std::mutex> lk(errMtx);
-    return errFlag;
+    return !err;
 }
 
 int BoostSerial::getErr()
@@ -565,7 +540,6 @@ int BoostSerial::getErr()
 void BoostSerial::clear()
 {
     std::unique_lock<std::mutex> lk(errMtx);
-    errFlag = 0;
     err = errorCode::success;
 }
 
