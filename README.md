@@ -59,7 +59,7 @@ stopBitsType stopBits = stopBitsType::one);
 ```cpp
 bool isOpen() const;
 ```
-+ **returns:** True if serial port is opened, false otherwise<br />
++ **returns:** True if serial port is open, false otherwise<br />
 ***
 ### Close serial port
 ```cpp
@@ -116,7 +116,7 @@ template<typename T>
 
 + **returns:** Number of characters written<br /><br />
 ***
-### Print ascii formatted characters or strings with newline
+### Print ascii formatted data with newline
 ```cpp
 template<typename T>
   unsigned int println(T const & data, unsigned int option = BoostSerial::DEC);
@@ -139,7 +139,7 @@ int16_t read();
 ```cpp
 std::vector<uint8_t> readBuffer();
 ```
-+ **returns:** Current content of buffer (clears the buffer)
++ **returns:** Current content of read buffer (clears the buffer)
 ***
 ```cpp
 std::vector<uint8_t> readBytes(uint16_t len = 0xFFFF);
@@ -169,7 +169,7 @@ std::string readString();
 ```cpp
 std::string readStringUntil(char terminator = '\0');
 ```
-+ **terminator:** Character that will end the reading(this character is not included in the return but is removed from the buffer)
++ **terminator:** Character that will end the reading (this character is not included in the return but is removed from the buffer)
 <br />
 
 + **returns:** String to given terminator or smaller string if timeout happened and terminator hadn't been found (read characters are removed from the buffer).

@@ -381,7 +381,6 @@ std::vector<uint8_t> BoostSerial::readBytes(uint16_t len)
 std::vector<uint8_t> BoostSerial::readBytesUntil(uint8_t givenByte, uint16_t len)
 {
     auto start = std::chrono::system_clock::now();
-    bool timeout = false;
     bool endFlag = false;
     std::vector<uint8_t> res;
     //check whether given number of bytes has been read
