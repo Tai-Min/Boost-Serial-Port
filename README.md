@@ -186,6 +186,12 @@ unsigned int available() const;
 ```
 + **returns:** Number of bytes waiting in the read buffer<br />
 ***
+### Check if serial port is in idle state
+```cpp
+bool idle() const;
+```
++ **returns:** True if there is no write operation on serial port<br />
+***
 ### Clear read buffer
 ```cpp
 void flush();

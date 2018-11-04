@@ -131,6 +131,7 @@ class BoostSerial
 
     //returns whether there is data awaiting in the buffer
     unsigned int available() const;
+    bool idle() const;
 
     //clear buffer
     void flush();
@@ -546,6 +547,12 @@ unsigned int BoostSerial::available() const
     //returns true if there are some bytes in the buffer
     std::unique_lock<std::mutex> lk(readBufferMtx); //for readBufferSize;
     return usableReadBuffer.size();
+}
+
+bool BoostSerial::idle() const
+{
+    std::unique_lock<std::mutex> lx(writeMtx);
+    return !writeLocked;
 }
 
 void BoostSerial::flush()
