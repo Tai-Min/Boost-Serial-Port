@@ -1,6 +1,7 @@
 # Boost-Serial-Port
 
-This header file provides synchronous, non-blocking access to utilize device's hardware serial port in Arduino-like manner<br /><br />
+This header file provides asynchronous, non-blocking access to utilize device's hardware serial port in Arduino-like manner<br /><br />
+Every write function returns instantly.
 
 ## Build
 #### Linux
