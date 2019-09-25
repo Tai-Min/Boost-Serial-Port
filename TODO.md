@@ -2,3 +2,4 @@
 + make oneliners inline
 + change serial work to pointer
 + handle eof error as success
++ block read till eof
