@@ -373,6 +373,7 @@ std::vector<uint8_t> BoostSerial::readBytes(uint16_t len)
             if (b > -1)
             {
                 res.push_back(b);
+                start = std::chrono::system_clock::now();
             }
         }
     }
@@ -408,6 +409,7 @@ std::vector<uint8_t> BoostSerial::readBytesUntil(uint8_t givenByte, uint16_t len
             else if (readByte > -1)
             {
                 res.push_back(readByte);
+                start = std::chrono::system_clock::now();
             }
         }
     }
