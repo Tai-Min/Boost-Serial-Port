@@ -34,7 +34,7 @@ class BoostSerial
   private:
     //serial device stuff
     boost::asio::io_service serial_service;
-    boost::asio::io_service::work serial_work;
+    std::unique_ptr<boost::asio::io_service::work> serial_work;
     boost::asio::serial_port serial;
 
     //async stuff
