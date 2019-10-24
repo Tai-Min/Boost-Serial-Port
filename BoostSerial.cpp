@@ -9,6 +9,9 @@ void BoostSerial::asyncReadHandler(const boost::system::error_code &error, std::
     }
     elk.unlock();
 
+    if(error.value() == 995)
+        return;//operation aborted
+
     //place the content of buffer array into usableReadBuffer vector
     //usableReadBuffer is necessary because using handler buffer directly in read() or available() functions
     //fuck ups entire class for some reason
@@ -29,10 +32,10 @@ void BoostSerial::asyncReadHandler(const boost::system::error_code &error, std::
     }
     lk.unlock();
 
-    //read async again
-    serial.async_read_some(
-        boost::asio::buffer(buf, buf.size()),
-        [this](const boost::system::error_code &error, std::size_t bytes_transferred) {
+        //read async again
+        serial.async_read_some(
+                    boost::asio::buffer(buf, buf.size()),
+                    [this](const boost::system::error_code &error, std::size_t bytes_transferred) {
             asyncReadHandler(error, bytes_transferred);
         });
 }
@@ -64,14 +67,14 @@ void BoostSerial::printString(const std::string &s)
     lk.unlock();
 
     boost::asio::async_write(
-        serial,
-        boost::asio::buffer(s, s.size()),
-        [this](const boost::system::error_code &error, std::size_t bytes_transferred) {
-            asyncWriteHandler(error, bytes_transferred);
-        });
+                serial,
+                boost::asio::buffer(s, s.size()),
+                [this](const boost::system::error_code &error, std::size_t bytes_transferred) {
+        asyncWriteHandler(error, bytes_transferred);
+    });
 }
 
-BoostSerial::BoostSerial() : serial_service(), serial(serial_service), serial_work(serial_service), asyncReadThread(nullptr) {}
+BoostSerial::BoostSerial() : serial_service(), serial(serial_service), asyncReadThread(nullptr) {}
 
 BoostSerial::~BoostSerial()
 {
@@ -95,11 +98,11 @@ unsigned int BoostSerial::write(const std::vector<uint8_t> &v)
     lk.unlock();        //asyncWriteHandler can access writeLocked now
 
     boost::asio::async_write(
-        serial,
-        boost::asio::buffer(v, v.size()),
-        [this](const boost::system::error_code &error, std::size_t bytes_transferred) {
-            asyncWriteHandler(error, bytes_transferred);
-        });
+                serial,
+                boost::asio::buffer(v, v.size()),
+                [this](const boost::system::error_code &error, std::size_t bytes_transferred) {
+        asyncWriteHandler(error, bytes_transferred);
+    });
 
     return v.size();
 }
@@ -325,7 +328,12 @@ void BoostSerial::open(std::string dname,
                        parityType parity_,
                        stopBitsType stopBits_)
 {
+    //cleanup if port was already opened
+    if(serial.is_open())
+        close();
+
     serial.open(dname);
+
     if (!serial.is_open())
         return;
 
@@ -342,15 +350,17 @@ void BoostSerial::open(std::string dname,
     serial.set_option(boost::asio::serial_port_base::parity(parity));
     serial.set_option(boost::asio::serial_port_base::stop_bits(stopBits));
 
+    serial_work.reset(new boost::asio::io_service::work(serial_service));
     //create thread that will read incoming data asynchronously
     asyncReadThread.reset(new std::thread([this] { serial_service.run(); }));
 
     //push the first read request
     serial.async_read_some(
-        boost::asio::buffer(buf, buf.size()),
-        [this](const boost::system::error_code &error, std::size_t bytes_transferred) {
-            asyncReadHandler(error, bytes_transferred);
-        });
+                boost::asio::buffer(buf, buf.size()),
+                [this](const boost::system::error_code &error, std::size_t bytes_transferred) {
+
+        asyncReadHandler(error, bytes_transferred);
+    });
 }
 
 bool BoostSerial::isOpen() const
@@ -363,12 +373,21 @@ void BoostSerial::close()
     if (!serial.is_open())
         return;
 
+    clear();//clear read buffer
+
     //cancel pending async processes
     serial.cancel();
 
     //finish async read thread and delete it
     serial_service.stop();
-    asyncReadThread->join();
+    if(asyncReadThread.get() != nullptr)
+    {
+        asyncReadThread->join();
+        asyncReadThread.reset(nullptr);
+    }
+
+    //reset io service for reopening
+    serial_service.reset();
 
     serial.close();
 }
