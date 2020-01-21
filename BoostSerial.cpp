@@ -1,5 +1,7 @@
 #include "BoostSerial.h"
 
+#include <iostream>
+using namespace std;
 void BoostSerial::asyncReadHandler(const boost::system::error_code &error, std::size_t bytes_transferred)
 {
     std::unique_lock<std::mutex> elk(errMtx);
@@ -57,8 +59,6 @@ void BoostSerial::asyncWriteHandler(const boost::system::error_code &error, std:
 
 void BoostSerial::printString(const std::string &s)
 {
-    //TODO to change
-    //so it doesn't repeat write() function
     std::unique_lock<std::mutex> lk(writeMtx); //lock variable
     if (writeLocked)                           //if previous async is still writting
         writeCv.wait(lk);                      //pause this thread and wait until write is finished then lock variable again
@@ -73,8 +73,6 @@ void BoostSerial::printString(const std::string &s)
         asyncWriteHandler(error, bytes_transferred);
     });
 }
-
-BoostSerial::BoostSerial() : serial_service(), serial(serial_service), asyncReadThread(nullptr) {}
 
 BoostSerial::~BoostSerial()
 {
@@ -266,11 +264,6 @@ std::vector<uint8_t> BoostSerial::readBytesUntil(uint8_t givenByte, uint16_t len
     return res;
 }
 
-std::string BoostSerial::readString()
-{
-    return readStringUntil();
-}
-
 std::string BoostSerial::readStringUntil(char givenChar)
 {
     auto start = std::chrono::system_clock::now();
@@ -363,11 +356,6 @@ void BoostSerial::open(std::string dname,
     });
 }
 
-bool BoostSerial::isOpen() const
-{
-    return serial.is_open();
-}
-
 void BoostSerial::close()
 {
     if (!serial.is_open())
@@ -423,11 +411,6 @@ bool BoostSerial::idle() const
     return !writeLocked;
 }
 
-void BoostSerial::flush()
-{
-    readBuffer();
-}
-
 void BoostSerial::setBaud(unsigned int b)
 {
     baud = b;
@@ -469,43 +452,8 @@ void BoostSerial::setBufferSize(unsigned int b)
     readBufferSize = b;
 }
 
-void BoostSerial::setTimeout(unsigned int t)
-{
-    timeoutVal = t;
-}
-
-unsigned int BoostSerial::getBaud() const
-{
-    return baud;
-}
-
-auto BoostSerial::getFlowControl() const -> flowControlType 
-{
-    return flowControl;
-}
-
-unsigned int BoostSerial::getCharacterSize() const
-{
-    return characterSize;
-}
-
-auto BoostSerial::getParity() const -> parityType 
-{
-    return parity;
-}
-
-auto BoostSerial::getStopBits() const -> stopBitsType 
-{
-    return stopBits;
-}
-
 unsigned int BoostSerial::getBufferSize() const
 {
     std::unique_lock<std::mutex> lk(readBufferMtx); //for readBufferSize;
     return readBufferSize;
-}
-
-unsigned int BoostSerial::getTimeout() const
-{
-    return timeoutVal;
 }
