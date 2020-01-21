@@ -67,7 +67,7 @@ class BoostSerial
     void printString(std::string const &);
 
   public:
-    BoostSerial();
+    BoostSerial() : serial_service(), serial(serial_service), asyncReadThread(nullptr) {}
     ~BoostSerial();
 
     //open serial port and start async read thread
@@ -77,7 +77,7 @@ class BoostSerial
               unsigned int = 8,
               parityType = parityType::none,
               stopBitsType = stopBitsType::one);
-    bool isOpen() const;
+    bool isOpen() const{return serial.is_open();}
     void close();
     bool good() const;
 
@@ -118,7 +118,7 @@ class BoostSerial
 
     //read string until \0
     //or timeout
-    std::string readString();
+    std::string readString(){return readStringUntil();}
 
     //read to given character (doesn't includes it in the result but removes from buffer)
     //or to end the of buffer if character couldn't be found
@@ -134,7 +134,7 @@ class BoostSerial
     bool idle() const;
 
     //clear buffer
-    void flush();
+    void flush(){readBuffer();}
 
     void setBaud(unsigned int = 115200);
     void setFlowControl(flowControlType = flowControlType::none);
@@ -142,15 +142,15 @@ class BoostSerial
     void setParity(parityType = parityType::none);
     void setStopBits(stopBitsType = stopBitsType::one);
     void setBufferSize(unsigned int = 256);
-    void setTimeout(unsigned int = 1000);
+    void setTimeout(unsigned int t = 1000){timeoutVal = t;}
 
-    unsigned int getBaud() const;
-    flowControlType getFlowControl() const;
-    unsigned int getCharacterSize() const;
-    parityType getParity() const;
-    stopBitsType getStopBits() const;
+    unsigned int getBaud() const{return baud;}
+    flowControlType getFlowControl() const{return flowControl;}
+    unsigned int getCharacterSize() const{return characterSize;}
+    parityType getParity() const{return parity;}
+    stopBitsType getStopBits() const{return stopBits;}
     unsigned int getBufferSize() const;
-    unsigned int getTimeout() const;
+    unsigned int getTimeout() const{return timeoutVal;}
 };
 
 #endif
