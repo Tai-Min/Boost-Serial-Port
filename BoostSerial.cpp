@@ -325,7 +325,10 @@ void BoostSerial::open(std::string dname,
     if(serial.is_open())
         close();
 
-    serial.open(dname);
+    try{
+        serial.open(dname);
+    }
+    catch(...){}
 
     if (!serial.is_open())
         return;
