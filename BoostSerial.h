@@ -67,89 +67,272 @@ class BoostSerial
     void printString(std::string const &);
 
   public:
+    /**
+     * @brief Class constructor.
+     */
     BoostSerial() : serial_service(), serial(serial_service), asyncReadThread(nullptr) {}
+
+    /**
+     * @brief Class destructor.
+     */
     ~BoostSerial();
 
-    //open serial port and start async read thread
-    void open(std::string,
-              unsigned int = 115200,
-              flowControlType = flowControlType::none,
-              unsigned int = 8,
-              parityType = parityType::none,
-              stopBitsType = stopBitsType::one);
+    /**
+     * @brief Open serial port and start async read thread.
+     * 
+     * @param dname Name of serial port to connect to.
+     * @param baud_ Baud rate.
+     * @param flowControl_ Flow control either none / software / hardware.
+     * @param characterSize_ Character size.
+     * @param parity_ Parity either none / odd / even.
+     * @param stopBits Number of stop bits either one / onepointfive / two.
+     */
+    void open(std::string dname,
+              unsigned int baud_ = 115200,
+              flowControlType flowControl_ = flowControlType::none,
+              unsigned int characterSize_ = 8,
+              parityType parity_ = parityType::none,
+              stopBitsType stopBits_ = stopBitsType::one);
+
+    /**
+     * @brief Check whether serial port is open.
+     * 
+     * @return True if open, false otherwise.
+     */
     bool isOpen() const{return serial.is_open();}
+
+    /**
+     * @brief Close serial port.
+     */
     void close();
+
+    /**
+     * @brief Check whether something happened to serial port.
+     * 
+     * @return False if something happened, true on successful operation.
+     */
     bool good() const;
 
+    /**
+     * @brief Clear port's error flag.
+     */
     void clear();
+
+    /**
+     * @brief Get error code of previous operation
+     * 
+     * @return Error code, see: https://www.boost.org/doc/libs/1_68_0/boost/system/error_code.hpp
+     */
     int getErr() const;
 
-    //write one byte
-    unsigned int write(uint8_t);
-    //write vector of bytes
-    unsigned int write(std::vector<uint8_t> const &);
+    /**
+     * @brief Write single byte.
+     * 
+     * @param c Byte to be written.
+     * @return Number of bytes written (should be 1).
+     */
+    unsigned int write(uint8_t c);
+    
+    /**
+     * @brief Write vector of bytes.
+     * 
+     * @param v Vector to be written.
+     * @return Number of bytes written (should be size of v).
+     */
+    unsigned int write(std::vector<uint8_t> const &v);
 
-    //print to stream any data using stringstream
-    //second parameter depends on type
-    //for int its bin/dec/oct/hex
-    //for double its decimal point precision
-    //for others its useless
+    /**
+     * @brief Write any data to serial port using stringstream.
+     * 
+     * @param a Data to be written.
+     * @param option For integers it's display option (either BIN, DEC, OCT, HEX),
+     * for floating point it's decimal point precision
+     * for others it's useless.
+     * @return Number of bytes written.
+     */
     template <class T>
-    unsigned int print(T const &, unsigned int = DEC);
+    unsigned int print(T const &a, unsigned int option = DEC);
 
-    //same as above with newline added
+    /**
+     * @brief Write any data to serial port using stringstream, appends a newline at the end.
+     * 
+     * @param a Data to be written.
+     * @param option For integers it's display option (either BIN, DEC, OCT, HEX),
+     * for floating point it's decimal point precision
+     * for others it's useless.
+     * @return Number of bytes written.
+     */
     template <class T>
-    unsigned int println(T const &, unsigned int = DEC);
+    unsigned int println(T const &a, unsigned int option = DEC);
 
-    //read one character/byte -1 if buffer is empty
+    /**
+     * @brief Read one character from serial port.
+     * 
+     * @return Byte or -1 if buffer is empty.
+     */
     int16_t read();
 
-    //read everything as a vector of bytes
+    /**
+     * @brief Read all available bytes to be read from serial port.
+     * 
+     * @return Content of serial port's buffer. The buffer is cleared after this operation.
+     */
     std::vector<uint8_t> readBuffer();
 
-    //read bytes until given number of bytes has been read or timeout happens
-    std::vector<uint8_t> readBytes(uint16_t = 0xFFFF);
+    /**
+     * @brief Read bytes until number of bytes has been read or timeout.
+     * 
+     * @param len Number of bytes to read.
+     * @return Vector of bytes.
+     */
+    std::vector<uint8_t> readBytes(uint16_t len = 0xFFFF);
 
-    //read bytes until given value (removes it from buffer but doesn't includes it in the result)
-    //or given number of bytes has been read
-    //or timeout
-    //whichever was first
-    std::vector<uint8_t> readBytesUntil(uint8_t, uint16_t = 0xFFFF);
+    /**
+     * @brief Read bytes until given value or given number of bytes has been read or timeout, whichever criteria has been met first.
+     * 
+     * @param givenByte The "stop" byte. This byte is not included in result vector.
+     * @param len Maximum number of bytes to read.
+     * @return Vector of bytes from serial port.
+     */
+    std::vector<uint8_t> readBytesUntil(uint8_t givenByte, uint16_t len = 0xFFFF);
 
-    //read string until \0
-    //or timeout
+    /**
+     * @brief Read string until \0 or timeout.
+     * 
+     * @return String received from serial port.
+     */
     std::string readString(){return readStringUntil();}
 
-    //read to given character (doesn't includes it in the result but removes from buffer)
-    //or to end the of buffer if character couldn't be found
-    //or to \0
-    //whichever is first
-    std::string readStringUntil(char = '\0');
+    /**
+     * @brief Read string until given character, \0 or timeout, whichever criteria has been met first.
+     * 
+     * @param givenChar The "stop" character. This character is not included in result string.
+     * @return String received from serial port.
+     */
+    std::string readStringUntil(char givenChar = '\0');
 
-    //check next character in the buffer without removing it -1 if buffer is empty
+    /**
+     * @brief Check next character in serial port's receive buffer without removing it.
+     * 
+     * @return Next character in serial port's receive buffer or -1 if buffer is empty
+     */
     int16_t peek() const;
 
-    //returns whether there is data awaiting in the buffer
+    /**
+     * @brief Check whether there is data awaiting in receive buffer.
+     * 
+     * @return Number of bytes awaiting in receive buffer.
+     */
     unsigned int available() const;
+
+    /**
+     * @brief Check whether serial port is idle.
+     * 
+     * @return True if there is no write operation on serial port.
+     */
     bool idle() const;
 
-    //clear buffer
+    /**
+     * @brief Clear receive buffer.
+     */
     void flush(){readBuffer();}
 
-    void setBaud(unsigned int = 115200);
-    void setFlowControl(flowControlType = flowControlType::none);
-    void setCharacterSize(unsigned int = 8);
-    void setParity(parityType = parityType::none);
-    void setStopBits(stopBitsType = stopBitsType::one);
-    void setBufferSize(unsigned int = 256);
+    /**
+     * @brief Set baud rate.
+     * 
+     * @param b Baud rate to be set.
+     */
+    void setBaud(unsigned int b = 115200);
+
+    /**
+     * @brief Set flow control.
+     * 
+     * @param t Flow control to be set, either none / software / hardware.
+     */
+    void setFlowControl(flowControlType t = flowControlType::none);
+
+    /**
+     * @brief Set character size.
+     * 
+     * @param s Character size to be set.
+     */
+    void setCharacterSize(unsigned int s = 8);
+
+    /**
+     * @brief Set paryty.
+     * 
+     * @param t Parity to be set, either none / odd / even.
+     */
+    void setParity(parityType t = parityType::none);
+
+    /**
+     * @brief Set stop bits.
+     * 
+     * @param t Stop bits to be set, either one / onepointfive / two.
+     */
+    void setStopBits(stopBitsType t = stopBitsType::one);
+
+    /**
+     * @brief Set buffer size.
+     * 
+     * @param b Buffer size to be set.
+     */
+    void setBufferSize(unsigned int b = 256);
+
+    /**
+     * @brief Set timeout.
+     * 
+     * @param t Timeout to be set in milliseconds.
+     */
     void setTimeout(unsigned int t = 1000){timeoutVal = t;}
 
+    /**
+     * @brief Get baud rate.
+     * 
+     * @return Baud rate of serial port.
+     */
     unsigned int getBaud() const{return baud;}
+
+    /**
+     * @brief Get flow control.
+     * 
+     * @return Flow control of serial port.
+     */
     flowControlType getFlowControl() const{return flowControl;}
+
+    /**
+     * @brief Get character size.
+     * 
+     * @return Character size of serial port.
+     */
     unsigned int getCharacterSize() const{return characterSize;}
+
+    /**
+     * @brief Get parity.
+     * 
+     * @return Parity of serial port.
+     */
     parityType getParity() const{return parity;}
+
+    /**
+     * @brief Get stop bits.
+     * 
+     * @return Stop bits of serial port.
+     */
     stopBitsType getStopBits() const{return stopBits;}
+
+    /**
+     * @brief Get buffer size.
+     * 
+     * @return Buffer size of serial port.
+     */
     unsigned int getBufferSize() const;
+
+    /**
+     * @brief Get timeout.
+     * 
+     * @return Timeout of serial port.
+     */
     unsigned int getTimeout() const{return timeoutVal;}
 };
 
