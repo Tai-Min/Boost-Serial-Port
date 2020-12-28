@@ -4,3 +4,7 @@ cmake_install.cmake
 Makefile
 rungtest
 .vscode/
+external/gtest/*
+*.a
+*.o
+*.orig
