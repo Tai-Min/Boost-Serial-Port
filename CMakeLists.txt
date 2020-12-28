@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.0)
 project(BoostSerial)
 
 ###################################################################
+# Option Setting
+option(ENABLE_TEST "Download gtest and build test program.(Default:OFF)" OFF)
+
+###################################################################
 # General Setting
 
 # enalble C++17
@@ -33,6 +37,8 @@ target_compile_options(boost_serial PUBLIC -Wall -O3)
 
 ###################################################################
 # enable ExternalProject
+
+if(ENABLE_TEST)
 include(ExternalProject)
 set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
 include_directories(${EXTERNAL_INSTALL_LOCATION}/include)
@@ -100,7 +106,8 @@ file(GLOB TEST_SRC test/*.cpp)
 
 add_executable(rungtest ${TEST_SRC})
 target_link_libraries(rungtest PUBLIC boost_serial boost_system pthread gtest gtest_main)
-target_compile_options(rungtest PUBLIC -Wall -O3)
+target_compile_options(rungtest PUBLIC -Wall -O3 -Wno-sign-compare)
 
+enable_testing()
 add_test(rungtest rungtest)
-
+endif()

@@ -8,3 +8,4 @@ external/gtest/*
 *.a
 *.o
 *.orig
+*.cmake

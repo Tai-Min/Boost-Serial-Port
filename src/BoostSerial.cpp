@@ -1,7 +1,7 @@
 #include "BoostSerial.h"
 
-#include <iostream>
-using namespace std;
+
+
 void BoostSerial::asyncReadHandler(const boost::system::error_code &error, std::size_t bytes_transferred)
 {
     std::unique_lock<std::mutex> elk(errMtx);
@@ -18,7 +18,7 @@ void BoostSerial::asyncReadHandler(const boost::system::error_code &error, std::
     //fuck ups entire class for some reason
     //probably due to manipulating buffer in async_read_some
     std::unique_lock<std::mutex> lk(readBufferMtx); //for readBufferSize and usableReadBuffer
-    for (auto i = 0; i < bytes_transferred; i++) {
+    for (size_t i = 0; i < bytes_transferred; i++) {
         usableReadBuffer.push_back(buf[i]);
     }
 
@@ -68,6 +68,12 @@ void BoostSerial::printString(const std::string &s)
     [this](const boost::system::error_code & error, std::size_t bytes_transferred) {
         asyncWriteHandler(error, bytes_transferred);
     });
+}
+
+BoostSerial::BoostSerial()
+    : serial_service(), serial(serial_service), asyncReadThread(nullptr)
+{
+
 }
 
 BoostSerial::~BoostSerial()
@@ -272,6 +278,11 @@ void BoostSerial::open(std::string dname,
     });
 }
 
+bool BoostSerial::isOpen() const
+{
+    return serial.is_open();
+}
+
 void BoostSerial::close()
 {
     if (!serial.is_open())
@@ -326,6 +337,12 @@ bool BoostSerial::idle() const
     return !writeLocked;
 }
 
+
+void BoostSerial::flush()
+{
+    usableReadBuffer.clear();
+}
+
 void BoostSerial::setBaud(unsigned int b)
 {
     baud = b;
@@ -371,4 +388,44 @@ unsigned int BoostSerial::getBufferSize() const
 {
     std::unique_lock<std::mutex> lk(readBufferMtx); //for readBufferSize;
     return readBufferSize;
+}
+
+std::string BoostSerial::readString()
+{
+    return readStringUntil();
+}
+
+void BoostSerial::setTimeout(unsigned int t)
+{
+    timeoutVal = t;
+}
+
+unsigned int BoostSerial::getBaud() const
+{
+    return baud;
+}
+
+BoostSerial::flowControlType BoostSerial::getFlowControl() const
+{
+    return flowControl;
+}
+
+unsigned int BoostSerial::getCharacterSize() const
+{
+    return characterSize;
+}
+
+BoostSerial::parityType BoostSerial::getParity() const
+{
+    return parity;
+}
+
+BoostSerial::stopBitsType BoostSerial::getStopBits() const
+{
+    return stopBits;
+}
+
+unsigned int BoostSerial::getTimeout() const
+{
+    return timeoutVal;
 }

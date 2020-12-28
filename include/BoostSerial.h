@@ -1,5 +1,4 @@
-#ifndef BOOST_SERIAL_H
-#define BOOST_SERIAL_H
+#pragma once
 
 #include <array>
 #include <vector>
@@ -7,7 +6,6 @@
 
 #include <thread>
 #include <mutex>
-#include <condition_variable>
 
 #include <sstream>
 #include <iomanip>
@@ -69,12 +67,12 @@ public:
     /**
      * @brief Class constructor.
      */
-    BoostSerial() : serial_service(), serial(serial_service), asyncReadThread(nullptr) {}
+    BoostSerial();
 
     /**
      * @brief Class destructor.
      */
-    ~BoostSerial();
+    virtual ~BoostSerial();
 
     /**
      * @brief Open serial port and start async read thread.
@@ -98,10 +96,7 @@ public:
      *
      * @return True if open, false otherwise.
      */
-    bool isOpen() const
-    {
-        return serial.is_open();
-    }
+    bool isOpen() const;
 
     /**
      * @brief Close serial port.
@@ -259,10 +254,7 @@ public:
      *
      * @return String received from serial port.
      */
-    std::string readString()
-    {
-        return readStringUntil();
-    }
+    std::string readString();
 
     /**
      * @brief Read string until given character, \0 or timeout, whichever criteria has been met first.
@@ -296,10 +288,7 @@ public:
     /**
      * @brief Clear receive buffer.
      */
-    void flush()
-    {
-        readBuffer();
-    }
+    void flush();
 
     /**
      * @brief Set baud rate.
@@ -348,60 +337,42 @@ public:
      *
      * @param t Timeout to be set in milliseconds.
      */
-    void setTimeout(unsigned int t = 1000)
-    {
-        timeoutVal = t;
-    }
+    void setTimeout(unsigned int t = 1000);
 
     /**
      * @brief Get baud rate.
      *
      * @return Baud rate of serial port.
      */
-    unsigned int getBaud() const
-    {
-        return baud;
-    }
+    unsigned int getBaud() const;
 
     /**
      * @brief Get flow control.
      *
      * @return Flow control of serial port.
      */
-    flowControlType getFlowControl() const
-    {
-        return flowControl;
-    }
+    flowControlType getFlowControl() const;
 
     /**
      * @brief Get character size.
      *
      * @return Character size of serial port.
      */
-    unsigned int getCharacterSize() const
-    {
-        return characterSize;
-    }
+    unsigned int getCharacterSize() const;
 
     /**
      * @brief Get parity.
      *
      * @return Parity of serial port.
      */
-    parityType getParity() const
-    {
-        return parity;
-    }
+    parityType getParity() const;
 
     /**
      * @brief Get stop bits.
      *
      * @return Stop bits of serial port.
      */
-    stopBitsType getStopBits() const
-    {
-        return stopBits;
-    }
+    stopBitsType getStopBits() const;
 
     /**
      * @brief Get buffer size.
@@ -415,10 +386,5 @@ public:
      *
      * @return Timeout of serial port.
      */
-    unsigned int getTimeout() const
-    {
-        return timeoutVal;
-    }
+    unsigned int getTimeout() const;
 };
-
-#endif
