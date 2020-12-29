@@ -1,7 +1,7 @@
 #include "BoostSerial.h"
 
-#include <iostream>
-using namespace std;
+
+
 void BoostSerial::asyncReadHandler(const boost::system::error_code &error, std::size_t bytes_transferred)
 {
     std::unique_lock<std::mutex> elk(errMtx);
@@ -11,7 +11,7 @@ void BoostSerial::asyncReadHandler(const boost::system::error_code &error, std::
     }
     elk.unlock();
 
-    if(error.value() == 995)
+    if (error.value() == 995)
         return;//operation aborted
 
     //place the content of buffer array into usableReadBuffer vector
@@ -19,7 +19,7 @@ void BoostSerial::asyncReadHandler(const boost::system::error_code &error, std::
     //fuck ups entire class for some reason
     //probably due to manipulating buffer in async_read_some
     std::unique_lock<std::mutex> lk(readBufferMtx); //for readBufferSize and usableReadBuffer
-    for (auto i = 0; i < bytes_transferred; i++)
+    for (size_t i = 0; i < bytes_transferred; i++)
     {
         usableReadBuffer.push_back(buf[i]);
     }
@@ -34,12 +34,13 @@ void BoostSerial::asyncReadHandler(const boost::system::error_code &error, std::
     }
     lk.unlock();
 
-        //read async again
-        serial.async_read_some(
-                    boost::asio::buffer(buf, buf.size()),
-                    [this](const boost::system::error_code &error, std::size_t bytes_transferred) {
-            asyncReadHandler(error, bytes_transferred);
-        });
+    //read async again
+    serial.async_read_some(
+        boost::asio::buffer(buf, buf.size()),
+        [this](const boost::system::error_code & error, std::size_t bytes_transferred)
+    {
+        asyncReadHandler(error, bytes_transferred);
+    });
 }
 
 void BoostSerial::asyncWriteHandler(const boost::system::error_code &error, std::size_t bytes_transferred)
@@ -67,11 +68,18 @@ void BoostSerial::printString(const std::string &s)
     lk.unlock();
 
     boost::asio::async_write(
-                serial,
-                boost::asio::buffer(s, s.size()),
-                [this](const boost::system::error_code &error, std::size_t bytes_transferred) {
+        serial,
+        boost::asio::buffer(s, s.size()),
+        [this](const boost::system::error_code & error, std::size_t bytes_transferred)
+    {
         asyncWriteHandler(error, bytes_transferred);
     });
+}
+
+BoostSerial::BoostSerial()
+    : serial_service(), serial(serial_service), asyncReadThread(nullptr)
+{
+
 }
 
 BoostSerial::~BoostSerial()
@@ -96,80 +104,14 @@ unsigned int BoostSerial::write(const std::vector<uint8_t> &v)
     lk.unlock();        //asyncWriteHandler can access writeLocked now
 
     boost::asio::async_write(
-                serial,
-                boost::asio::buffer(v, v.size()),
-                [this](const boost::system::error_code &error, std::size_t bytes_transferred) {
+        serial,
+        boost::asio::buffer(v, v.size()),
+        [this](const boost::system::error_code & error, std::size_t bytes_transferred)
+    {
         asyncWriteHandler(error, bytes_transferred);
     });
 
     return v.size();
-}
-
-template <class T>
-unsigned int BoostSerial::print(T const &a, unsigned int option)
-{
-    //write unknown data to stringstream
-    std::stringstream ss;
-    //for float treat option as precision
-    if (std::is_floating_point<T>::value)
-    {
-        ss << std::setprecision(option) << std::fixed << a;
-    }
-    //for int treat it as print format
-    else if (std::is_integral<T>::value)
-    {
-        //only for BIN
-        bool trim = true;
-        std::string str;
-
-        switch (option)
-        {
-        case BIN:
-            ss << std::bitset<sizeof(T) * 8>(a);
-            str = ss.str();
-
-            //remove leading zeroes
-            while (trim)
-            {
-                if (!str.length())
-                    trim = false;
-                else if (str[0] == '1')
-                    trim = false;
-                else
-                    str.erase(str.begin());
-            }
-            ss.str(std::string());
-            ss.clear();
-            ss << str;
-            break;
-        case HEX:
-            ss << std::hex << a;
-            break;
-        case OCT:
-            ss << std::oct << a;
-            break;
-        case DEC:
-        default:
-            ss << a;
-            break;
-        }
-    }
-    //do not use option value for non int nor float
-    else
-    {
-        ss << a;
-    }
-    std::string res = ss.str();
-    printString(res);
-    return res.length();
-}
-
-template <class T>
-unsigned int BoostSerial::println(T const &t, unsigned int option)
-{
-    unsigned int r = print(t, option);
-    write('\n');
-    return r + 1;
 }
 
 int16_t BoostSerial::read()
@@ -322,13 +264,14 @@ void BoostSerial::open(std::string dname,
                        stopBitsType stopBits_)
 {
     //cleanup if port was already opened
-    if(serial.is_open())
+    if (serial.is_open())
         close();
 
-    try{
+    try
+    {
         serial.open(dname);
     }
-    catch(...){}
+    catch (...) {}
 
     if (!serial.is_open())
         return;
@@ -352,11 +295,17 @@ void BoostSerial::open(std::string dname,
 
     //push the first read request
     serial.async_read_some(
-                boost::asio::buffer(buf, buf.size()),
-                [this](const boost::system::error_code &error, std::size_t bytes_transferred) {
+        boost::asio::buffer(buf, buf.size()),
+        [this](const boost::system::error_code & error, std::size_t bytes_transferred)
+    {
 
         asyncReadHandler(error, bytes_transferred);
     });
+}
+
+bool BoostSerial::isOpen() const
+{
+    return serial.is_open();
 }
 
 void BoostSerial::close()
@@ -371,7 +320,7 @@ void BoostSerial::close()
 
     //finish async read thread and delete it
     serial_service.stop();
-    if(asyncReadThread.get() != nullptr)
+    if (asyncReadThread.get() != nullptr)
     {
         asyncReadThread->join();
         asyncReadThread.reset(nullptr);
@@ -412,6 +361,12 @@ bool BoostSerial::idle() const
 {
     std::unique_lock<std::mutex> lx(writeMtx);
     return !writeLocked;
+}
+
+
+void BoostSerial::flush()
+{
+    usableReadBuffer.clear();
 }
 
 void BoostSerial::setBaud(unsigned int b)
@@ -459,4 +414,63 @@ unsigned int BoostSerial::getBufferSize() const
 {
     std::unique_lock<std::mutex> lk(readBufferMtx); //for readBufferSize;
     return readBufferSize;
+}
+
+std::string BoostSerial::readString()
+{
+    return readStringUntil();
+}
+
+void BoostSerial::setTimeout(unsigned int t)
+{
+    timeoutVal = t;
+}
+
+unsigned int BoostSerial::getBaud() const
+{
+    return baud;
+}
+
+BoostSerial::flowControlType BoostSerial::getFlowControl() const
+{
+    return flowControl;
+}
+
+unsigned int BoostSerial::getCharacterSize() const
+{
+    return characterSize;
+}
+
+BoostSerial::parityType BoostSerial::getParity() const
+{
+    return parity;
+}
+
+BoostSerial::stopBitsType BoostSerial::getStopBits() const
+{
+    return stopBits;
+}
+
+unsigned int BoostSerial::getTimeout() const
+{
+    return timeoutVal;
+}
+
+std::vector<uint8_t> BoostSerial::readBytePattern(std::vector<uint8_t> start_pattern, std::vector<uint8_t> end_pattern)
+{
+    std::vector<uint8_t> matched;
+    std::unique_lock<std::mutex> lk(readBufferMtx); //for readBufferSize;
+
+    auto start = std::search(std::cbegin(usableReadBuffer), std::cend(usableReadBuffer), std::cbegin(start_pattern), std::cend(start_pattern));
+    auto end = std::search(std::cbegin(usableReadBuffer), std::cend(usableReadBuffer), std::cbegin(end_pattern), std::cend(end_pattern));
+
+    if (start != std::cend(usableReadBuffer) and end != std::cend(usableReadBuffer))
+    {
+        std::advance(end, end_pattern.size());
+
+        std::copy(start, end, std::back_inserter(matched));
+        usableReadBuffer.erase(std::begin(usableReadBuffer), end);
+    }
+
+    return matched;
 }

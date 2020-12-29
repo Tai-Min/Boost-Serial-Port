@@ -1,6 +1,6 @@
 #include <thread>
 #include <gtest/gtest.h>
-#include "../BoostSerial.h"
+#include "BoostSerial.h"
 
 #define DEFAULT_TIMEOUT 15
 
@@ -14,7 +14,7 @@ void setup()
 void loop()
 {
 
-    if (Serial.available() > 0) 
+    if (Serial.available() > 0)
     {
         Serial.write(Serial.read());
     }
@@ -157,7 +157,7 @@ TEST(Serial, readBytes)
     s.setTimeout(DEFAULT_TIMEOUT);
 
     //wait for the rest of the data
-    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_TIMEOUT*20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_TIMEOUT * 20));
     s.flush();
 }
 
@@ -179,7 +179,7 @@ TEST(Serial, readBytesUntil)
     s.setTimeout(DEFAULT_TIMEOUT);
 
     //wait for the rest of the data
-    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_TIMEOUT*20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_TIMEOUT * 20));
     s.flush();
 }
 
@@ -200,7 +200,7 @@ TEST(Serial, readString)
     s.setTimeout(DEFAULT_TIMEOUT);
 
     //wait for the rest of the data
-    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_TIMEOUT*20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_TIMEOUT * 20));
     s.flush();
 }
 
@@ -224,7 +224,7 @@ TEST(Serial, readStringUntil)
     s.setTimeout(DEFAULT_TIMEOUT);
 
     //wait for the rest of the data
-    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_TIMEOUT*20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_TIMEOUT * 20));
     s.flush();
 }
 
