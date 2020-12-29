@@ -34,7 +34,7 @@ target_include_directories(boost_serial PUBLIC include/)
 target_link_libraries(boost_serial PUBLIC ${Boost_LIBRARIES})
 
 # enable optimizations
-target_compile_options(boost_serial PUBLIC -Wall -O3)
+target_compile_options(boost_serial PUBLIC -g -Wall -O0)
 
 if(ENABLE_SAMPLE)
 # globbing file
@@ -50,7 +50,7 @@ target_include_directories(ByteTerminal PRIVATE include/)
 target_link_libraries(ByteTerminal PUBLIC boost_serial ${Boost_LIBRARIES} pthread)
 
 # enable optimizations
-target_compile_options(ByteTerminal PUBLIC -Wall -O3)
+target_compile_options(ByteTerminal PUBLIC -g -Wall -O0)
 
 # globbing file
 file(GLOB STRING_TERMINAL_SRC sample/StringTerminal.cpp)

@@ -21,7 +21,8 @@ public:
     typedef boost::asio::serial_port_base::parity::type parityType;
     typedef boost::asio::serial_port_base::stop_bits::type stopBitsType;
     typedef boost::system::errc::errc_t errorCode;
-    enum format {
+    enum format
+    {
         BIN = 0,
         OCT = 1,
         DEC = 2,
@@ -153,22 +154,26 @@ public:
         //write unknown data to stringstream
         std::stringstream ss;
         //for float treat option as precision
-        if (std::is_floating_point<T>::value) {
+        if (std::is_floating_point<T>::value)
+        {
             ss << std::setprecision(option) << std::fixed << a;
         }
         //for int treat it as print format
-        else if (std::is_integral<T>::value) {
+        else if (std::is_integral<T>::value)
+        {
             //only for BIN
             bool trim = true;
             std::string str;
 
-            switch (option) {
+            switch (option)
+            {
             case BIN:
                 ss << std::bitset<sizeof(T) * 8>(a);
                 str = ss.str();
 
                 //remove leading zeroes
-                while (trim) {
+                while (trim)
+                {
                     if (!str.length())
                         trim = false;
                     else if (str[0] == '1')
@@ -193,7 +198,8 @@ public:
             }
         }
         //do not use option value for non int nor float
-        else {
+        else
+        {
             ss << a;
         }
         std::string res = ss.str();
@@ -387,4 +393,11 @@ public:
      * @return Timeout of serial port.
      */
     unsigned int getTimeout() const;
+
+    /**
+     * @brief read bytes between read pattern and end pattern
+     *
+     * @return matched bytes in the buffer including start pattern and end pattern
+     */
+    std::vector<uint8_t> readBytePattern(std::vector<uint8_t> start_pattern, std::vector<uint8_t> end_pattern);
 };

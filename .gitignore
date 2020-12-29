@@ -11,4 +11,5 @@ external/gtest/*
 *.cmake
 ByteTerminal
 StringTerminal
+build/*
 
