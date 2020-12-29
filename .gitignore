@@ -9,3 +9,6 @@ external/gtest/*
 *.o
 *.orig
 *.cmake
+ByteTerminal
+StringTerminal
+

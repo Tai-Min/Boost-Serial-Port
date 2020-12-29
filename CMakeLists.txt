@@ -4,6 +4,7 @@ project(BoostSerial)
 ###################################################################
 # Option Setting
 option(ENABLE_TEST "Download gtest and build test program.(Default:OFF)" OFF)
+option(ENABLE_SAMPLE "build sample program.(Default:OFF)" OFF)
 
 ###################################################################
 # General Setting
@@ -35,10 +36,41 @@ target_link_libraries(boost_serial PUBLIC ${Boost_LIBRARIES})
 # enable optimizations
 target_compile_options(boost_serial PUBLIC -Wall -O3)
 
-###################################################################
-# enable ExternalProject
+if(ENABLE_SAMPLE)
+# globbing file
+file(GLOB BYTE_TERMINAL_SRC sample/ByteTerminal.cpp)
+
+# boost_serial.a
+add_executable(ByteTerminal ${BYTE_TERMINAL_SRC})
+
+# define include directories
+target_include_directories(ByteTerminal PRIVATE include/)
+
+# add dependency
+target_link_libraries(ByteTerminal PUBLIC boost_serial ${Boost_LIBRARIES} pthread)
+
+# enable optimizations
+target_compile_options(ByteTerminal PUBLIC -Wall -O3)
+
+# globbing file
+file(GLOB STRING_TERMINAL_SRC sample/StringTerminal.cpp)
+
+# boost_serial.a
+add_executable(StringTerminal ${STRING_TERMINAL_SRC})
+
+# define include directories
+target_include_directories(StringTerminal PRIVATE include/)
+
+# add dependency
+target_link_libraries(StringTerminal PUBLIC boost_serial ${Boost_LIBRARIES} pthread)
+
+# enable optimizations
+target_compile_options(StringTerminal PUBLIC -Wall -O3)
+endif()
 
 if(ENABLE_TEST)
+###################################################################
+# enable ExternalProject
 include(ExternalProject)
 set(EXTERNAL_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/external)
 include_directories(${EXTERNAL_INSTALL_LOCATION}/include)
